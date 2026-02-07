@@ -140,6 +140,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+/*
+ * NOTE: NUM_ENCODERS=NUM_ENCODERS_LEFT + NUM_ENCODERS_RIGHT
+ * Which is based on what pins are exposed to qmk for the encoders.
+ * This is somewhere in splitkb's base firmware and I'm too lazy to find it,
+ *   especially if I may add more encoders later.
+ * For now, far right encoder mapping is for the one I have installed
+ */
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [0] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
