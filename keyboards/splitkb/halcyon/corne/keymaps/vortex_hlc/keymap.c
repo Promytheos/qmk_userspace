@@ -108,7 +108,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_NAV] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME),   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_REDO,   KC_NO,
+            KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME),   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL, KC_NO,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_CAPS, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  KC_NO,   KC_NO,
                                            KC_NO,   KC_NO,   KC_NO,          KC_NO,   KC_NO,   KC_NO ,
@@ -117,7 +117,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_MOUSE] = LAYOUT_corne_hlc(
             KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME),   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
-            KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RIGHT, KC_NO, KC_NO,
+            KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
                                            KC_NO,   KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
             _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
