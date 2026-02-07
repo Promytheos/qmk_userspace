@@ -88,22 +88,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
             KC_NO, LGUI_T(KC_A), LALT_T(KC_S), LSFT_T(KC_D),  LCTL_T(KC_F),    KC_G,                KC_H,   RCTL_T(KC_J),  RSFT_T(KC_K), RALT_T(KC_L), RGUI_T(KC_QUOT), KC_NO ,
             KC_NO, KC_Z,         KC_X,         KC_C,          KC_V,            KC_B,                KC_N,   KC_M,          KC_COMM,      KC_DOT,       KC_SLSH,         KC_NO,
                                                      LT(_NAV, KC_DEL), LT(_NUM, KC_BSPC),  LT(_MOUSE, KC_ENT),       KC_TAB, LT(_FUN, KC_SPC), LT(_MISC, KC_ESC) ,
-                                                     KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO,             KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                                     TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO,             TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO
     ),
 
     [_GAME] = LAYOUT_corne_hlc(
             KC_ESC,  KC_Q, KC_W, KC_E,    KC_R,   KC_T,          KC_Y,    KC_U,   KC_I,    KC_O,   KC_P,    KC_MINUS ,
             KC_TAB,  KC_A, KC_S, KC_D,    KC_F,   KC_G,          KC_H,    KC_J,   KC_K,    KC_L,   KC_QUOT, MO(_NUM),
             KC_LSFT, KC_Z, KC_X, KC_C,    KC_V,   KC_B,          KC_N,    KC_M,   KC_COMM, KC_DOT, KC_SLSH, TD(TO_BASE),
-                                       KC_LCTL, KC_SPC, KC_LALT,       MO(_FUN),  KC_ENT, MO(_NAV) ,
-                   KC_MUTE, KC_NO, KC_NO,   KC_NO,  KC_NO,         KC_MUTE, KC_NO, KC_NO, KC_NO, KC_NO
+                                 KC_LCTL, KC_SPC, KC_LALT,       MO(_FUN),  KC_ENT, MO(_NAV) ,
+                 TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO,             TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO
     ),
 
     [_NUM] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO, KC_NO, KC_NO, TO(_GAME), KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
-            KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,          KC_EQL,   KC_4, KC_5, KC_6, KC_SCLN, KC_NO,
-            KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,          KC_BSLS,  KC_1, KC_2, KC_3, KC_GRV,  KC_NO,
-                                       KC_NO, KC_NO, KC_NO,          KC_MINUS, KC_0, KC_DOT,
+            KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME), KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
+            KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL,   KC_NO,          KC_EQL,   KC_4, KC_5, KC_6, KC_SCLN, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,     KC_NO,          KC_BSLS,  KC_1, KC_2, KC_3, KC_GRV,  KC_NO,
+                                     KC_NO,   KC_NO,     KC_NO,          KC_MINUS, KC_0, KC_DOT,
             _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______
     ),
 
@@ -142,12 +142,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [0] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
-    [1] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
-    [2] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
-    [3] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
-    [4] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
-    [5] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
-    [6] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN),  ENCODER_CCW_CW(KC_PGUP, KC_PGDN)  },
+    [0] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [1] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [2] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [3] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_PGDN, KC_PGUP)  },
+    [4] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(MS_WHLD, MS_WHLU)  },
+    [5] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [6] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
 };
 #endif
