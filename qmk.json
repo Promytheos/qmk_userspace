@@ -160,6 +160,14 @@
                 "HLC_NONE": "1",
                 "TARGET": "splitkb_halcyon_ferris_rev1_vial_hlc"
             }
+        ],
+        [
+            "splitkb/halcyon/corne/rev2",
+            "vortex_hlc",
+            {
+                "HLC_ENCODER": "1",
+                "TARGET": "splitkb_halcyon_corne_rev2_hlc_encoder_vortex"
+            }
         ]
     ]
 }
