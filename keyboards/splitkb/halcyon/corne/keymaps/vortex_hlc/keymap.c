@@ -45,6 +45,7 @@ typedef struct {
     uint16_t held;
 } tap_dance_tap_hold_t;
 
+tap_dance_action_t *tap_dance_get(uint16_t index);
 td_state_t cur_dance(tap_dance_state_t *state);
 void       x_finished(tap_dance_state_t *state, void *user_data);
 void       x_reset(tap_dance_state_t *state, void *user_data);
