@@ -154,13 +154,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [0] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
-    [1] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
-    [2] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
-    [3] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_PGDN, KC_PGUP)  },
-    [4] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(MS_WHLD, MS_WHLU)  },
-    [5] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
-    [6] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [_BASE] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [_GAME] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [_NUM] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [_NAV] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_PGDN, KC_PGUP)  },
+    [_MOUSE] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(MS_WHLD, MS_WHLU)  },
+    [_FUN] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
+    [_MISC] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
 };
 #endif
 
@@ -173,28 +173,10 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
  *
  * Pressed: Whether or not the key is still being pressed. If this value is true, that means the tapping term
  *  has ended, but the key is still being pressed down. This generally means the key is being "held".
- *
- * One thing that is currently not possible with qmk software in regards to tap dance is to mimic the "permissive hold"
- *  feature. In general, advanced tap dances do not work well if they are used with commonly typed letters.
- *  For example "A". Tap dances are best used on non-letter keys that are not hit while typing letters.
- *
- * Good places to put an advanced tap dance:
- *  z,q,x,j,k,v,b, any function key, home/end, comma, semi-colon
- *
- * Criteria for "good placement" of a tap dance key:
- *  Not a key that is hit frequently in a sentence
- *  Not a key that is used frequently to double tap, for example 'tab' is often double tapped in a terminal, or
- *    in a web form. So 'tab' would be a poor choice for a tap dance.
- *  Letters used in common words as a double. For example 'p' in 'pepper'. If a tap dance function existed on the
- *    letter 'p', the word 'pepper' would be quite frustrating to type.
- *
- * For the third point, there does exist the 'TD_DOUBLE_SINGLE_TAP', however this is not fully tested
- *
  */
 td_state_t cur_dance(tap_dance_state_t *state) {
     if (state->count == 1) {
         if (!state->pressed) return TD_SINGLE_TAP;
-        // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
         else return TD_SINGLE_HOLD;
     } else if (state->count == 2) {
         if (state->pressed) return TD_DOUBLE_HOLD;
