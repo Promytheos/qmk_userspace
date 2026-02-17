@@ -1,6 +1,3 @@
-// Copyright 2024 splitkb.com (support@splitkb.com)
-// SPDX-License-Identifier: GPL-2.0-or-later
-
 #include QMK_KEYBOARD_H
 
 enum layers {
@@ -13,6 +10,34 @@ enum layers {
     _MISC,
 };
 
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP,
+    TD_DOUBLE_HOLD,
+    TD_TRIPLE_TAP,
+    TD_TRIPLE_HOLD,
+} td_state_t;
+
+enum {
+    TO_BASE,
+    CT_MED,
+};
+
+enum custom_keycodes {
+    KC_CWRD = SAFE_RANGE,
+};
+
+typedef struct {
+    bool       is_press_action;
+    td_state_t state;
+} td_tap_t;
+
+td_state_t cur_dance(tap_dance_state_t *state);
+void x_finished(tap_dance_state_t *state, void *user_data);
+void x_reset(tap_dance_state_t *state, void *user_data);
 void caps_word_set_user(bool active) {
     if (active) {
         // Do something when Caps Word activates.
@@ -21,65 +46,45 @@ void caps_word_set_user(bool active) {
     }
 }
 
-// Tap Dance declarations
-enum {
-    TO_BASE,
-    CT_MED,
+const uint16_t PROGMEM caps_word1[]  = {KC_F, KC_J, COMBO_END};
+const uint16_t PROGMEM caps_word2[]  = {LCTL_T(KC_F), RCTL_T(KC_J), COMBO_END};
+
+combo_t key_combos[] = {
+    COMBO(caps_word1, KC_CWRD),
+    COMBO(caps_word2, KC_CWRD),
 };
 
-typedef struct {
-    uint16_t single_tap;
-    uint16_t double_tap;
-    uint16_t triple_tap;
-    uint16_t hold;
-    uint16_t held;
-} tap_dance_multi_hold_t;
-
-void tap_dance_multi_hold_finished(tap_dance_state_t *state, void *user_data) {
-    tap_dance_multi_hold_t *multi_hold = (tap_dance_multi_hold_t *)user_data;
-
-    if (state->pressed) {
-        register_code16(multi_hold->hold);
-        multi_hold->held = multi_hold->hold;
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case KC_CWRD:
+            if (record->event.pressed) {
+                caps_word_on();
+            }
+            break;
     }
-    else {
-        switch (state->count) {
-            case 1:
-                register_code16(multi_hold->single_tap);
-                multi_hold->held = multi_hold->single_tap;
-                break;
-            case 2:
-                register_code16(multi_hold->double_tap);
-                multi_hold->held = multi_hold->double_tap;
-                break;
-            case 3:
-                register_code16(multi_hold->triple_tap);
-                multi_hold->held = multi_hold->triple_tap;
-                break;
-        }
-    }
+    return true;
 }
 
-void tap_dance_multi_hold_reset(tap_dance_state_t *state, void *user_data) {
-    tap_dance_multi_hold_t *multi = (tap_dance_multi_hold_t *)user_data;
+bool caps_word_press_user(uint16_t keycode) {
+    switch (keycode) {
+        // Keycodes that continue Caps Word, with shift applied.
+        case KC_A ... KC_Z:
+        case KC_MINS:
+            add_weak_mods(MOD_BIT(KC_LSFT));  // Apply shift to next key.
+            return true;
 
-    if (multi->held) {
-        unregister_code16(multi->held);
-        multi->held = 0;
+        // Keycodes that continue Caps Word, without shifting.
+        case KC_1 ... KC_0:
+        case KC_BSPC:
+        case KC_DEL:
+        case KC_UNDS:
+        case KC_CWRD:
+            return true;
+
+        default:
+            return false;  // Deactivate Caps Word.
     }
 }
-
-#define ACTION_TAP_DANCE_MULTI_HOLD(single_tap, double_tap, triple_tap, hold)                                        \
-    {                                                                               \
-        .fn        = {NULL, tap_dance_multi_hold_finished, tap_dance_multi_hold_reset}, \
-        .user_data = (void *)&((tap_dance_multi_hold_t){single_tap, double_tap, triple_tap, hold, 0}),               \
-    }
-
-// Tap Dance definitions
-tap_dance_action_t tap_dance_actions[] = {
-    [TO_BASE] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _BASE),
-    [CT_MED] = ACTION_TAP_DANCE_MULTI_HOLD(KC_MPLY, KC_MNXT, KC_MPRV, KC_MUTE),
-};
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -100,26 +105,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_NUM] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME), KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
-            KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL,   KC_NO,          KC_EQL,   KC_4, KC_5, KC_6, KC_SCLN, KC_NO,
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,     KC_NO,          KC_BSLS,  KC_1, KC_2, KC_3, KC_GRV,  KC_NO,
-                                     KC_NO,   KC_NO,     KC_NO,          KC_MINUS, KC_0, KC_DOT,
+            KC_NO, KC_NO,   KC_NO,   TO(_GAME), KC_NO,   KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
+            KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          KC_EQL,   KC_4, KC_5, KC_6, KC_SCLN, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          KC_BSLS,  KC_1, KC_2, KC_3, KC_GRV,  KC_NO,
+                                     KC_NO,     KC_NO,   KC_NO,          KC_MINUS, KC_0, KC_DOT,
             _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______
     ),
 
     [_NAV] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME),   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
-            KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL, KC_NO,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_CAPS, KC_NO,
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  KC_NO,   KC_NO,
-                                           KC_NO,   KC_NO,   KC_NO,          KC_NO,   KC_NO,   KC_NO ,
+            KC_NO, KC_NO,   KC_NO,   TO(_GAME), KC_NO,   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
+            KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_CAPS, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  KC_NO,   KC_NO,
+                                     KC_NO,     KC_NO,   KC_NO,          KC_NO,   KC_NO,   KC_NO ,
             _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
     ),
 
     [_MOUSE] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   TO(_GAME),   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
-            KC_NO, KC_LGUI, KC_LALT, KC_LSFT, KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
-            KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
-                                           KC_NO,   KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
+            KC_NO, KC_NO,   KC_NO,   TO(_GAME), KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
+            KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
+                                     KC_NO,     KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
             _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
     ),
 
@@ -158,3 +163,81 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [6] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
 };
 #endif
+
+/* Return an integer that corresponds to what kind of tap dance should be executed.
+ *
+ * How to figure out tap dance state: interrupted and pressed.
+ *
+ * Interrupted: If the state of a dance is "interrupted", that means that another key has been hit
+ *  under the tapping term. This is typically indicative that you are trying to "tap" the key.
+ *
+ * Pressed: Whether or not the key is still being pressed. If this value is true, that means the tapping term
+ *  has ended, but the key is still being pressed down. This generally means the key is being "held".
+ *
+ * One thing that is currently not possible with qmk software in regards to tap dance is to mimic the "permissive hold"
+ *  feature. In general, advanced tap dances do not work well if they are used with commonly typed letters.
+ *  For example "A". Tap dances are best used on non-letter keys that are not hit while typing letters.
+ *
+ * Good places to put an advanced tap dance:
+ *  z,q,x,j,k,v,b, any function key, home/end, comma, semi-colon
+ *
+ * Criteria for "good placement" of a tap dance key:
+ *  Not a key that is hit frequently in a sentence
+ *  Not a key that is used frequently to double tap, for example 'tab' is often double tapped in a terminal, or
+ *    in a web form. So 'tab' would be a poor choice for a tap dance.
+ *  Letters used in common words as a double. For example 'p' in 'pepper'. If a tap dance function existed on the
+ *    letter 'p', the word 'pepper' would be quite frustrating to type.
+ *
+ * For the third point, there does exist the 'TD_DOUBLE_SINGLE_TAP', however this is not fully tested
+ *
+ */
+td_state_t cur_dance(tap_dance_state_t *state) {
+    if (state->count == 1) {
+        if (!state->pressed) return TD_SINGLE_TAP;
+        // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
+        else return TD_SINGLE_HOLD;
+    } else if (state->count == 2) {
+        if (state->pressed) return TD_DOUBLE_HOLD;
+        else return TD_DOUBLE_TAP;
+    }
+    if (state->count == 3) {
+        if (!state->pressed) return TD_TRIPLE_TAP;
+        else return TD_TRIPLE_HOLD;
+    } else return TD_UNKNOWN;
+}
+
+// Leave TD_DOUBLE_HOLD and TD_TRIPLE_HOLD undefined until I decide to use them
+
+// Create an instance of 'td_tap_t' for the 'x' tap dance.
+static td_tap_t xtap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void x_finished(tap_dance_state_t *state, void *user_data) {
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: register_code(KC_MPLY); break;
+        case TD_SINGLE_HOLD: register_code(KC_MUTE); break;
+        case TD_DOUBLE_TAP: register_code(KC_MNXT); break;
+        case TD_TRIPLE_TAP: register_code(KC_MPRV); break;
+        default: break;
+    }
+}
+
+void x_reset(tap_dance_state_t *state, void *user_data) {
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: unregister_code(KC_MPLY); break;
+        case TD_SINGLE_HOLD: unregister_code(KC_MUTE); break;
+        case TD_DOUBLE_TAP: unregister_code(KC_MNXT); break;
+        case TD_TRIPLE_TAP: unregister_code(KC_MPRV); break;
+        default: break;
+    }
+    xtap_state.state = TD_NONE;
+}
+
+// Tap Dance definitions
+tap_dance_action_t tap_dance_actions[] = {
+    [TO_BASE] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _BASE),
+    [CT_MED] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset)
+};
