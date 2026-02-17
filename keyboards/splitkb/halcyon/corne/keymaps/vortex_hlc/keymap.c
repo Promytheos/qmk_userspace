@@ -25,13 +25,13 @@ enum {
     TO_BASE,
     TO_GAME,
     CT_MED,
+    MS_ENC_CLK,
 };
 
 enum custom_keycodes {
     KC_CWRD = SAFE_RANGE,
     MS_ENC_CW,
     MS_ENC_CCW,
-    MS_ENC_CLK,
 };
 
 typedef struct {
@@ -57,8 +57,40 @@ combo_t key_combos[] = {
     COMBO(caps_word2, KC_CWRD),
 };
 
+bool caps_word_press_user(uint16_t keycode) {
+    switch (keycode) {
+        // Keycodes that continue Caps Word, with shift applied.
+        case KC_A ... KC_Z:
+        case KC_MINS:
+            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
+            return true;
+
+        // Keycodes that continue Caps Word, without shifting.
+        case KC_1 ... KC_0:
+        case KC_BSPC:
+        case KC_DEL:
+        case KC_UNDS:
+        case KC_CWRD:
+            return true;
+
+        default:
+            return false; // Deactivate Caps Word.
+    }
+}
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case CT_MED:
+            return 500;
+        default:
+            return TAPPING_TERM;
+    }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    uint8_t mods = get_mods();
+    tap_dance_action_t *action;
+    tap_dance_state_t  *state;
+    uint8_t             mods = get_mods();
     switch (keycode) {
         case KC_CWRD:
             if (record->event.pressed) {
@@ -112,37 +144,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     return true;
 }
-
-bool caps_word_press_user(uint16_t keycode) {
-    switch (keycode) {
-        // Keycodes that continue Caps Word, with shift applied.
-        case KC_A ... KC_Z:
-        case KC_MINS:
-            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
-            return true;
-
-        // Keycodes that continue Caps Word, without shifting.
-        case KC_1 ... KC_0:
-        case KC_BSPC:
-        case KC_DEL:
-        case KC_UNDS:
-        case KC_CWRD:
-            return true;
-
-        default:
-            return false; // Deactivate Caps Word.
-    }
-}
-
-uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case CT_MED:
-            return 500;
-        default:
-            return TAPPING_TERM;
-    }
-}
-
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = LAYOUT_corne_hlc(
@@ -178,11 +179,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_MOUSE] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TO_GAME, KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   TO_GAME,   KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
-                   _______, _______, _______, _______, _______,          MS_ENC_CLK, _______, _______ _______, _______
+             TD(MS_ENC_CLK), _______, _______, _______, _______,         TD(MS_ENC_CLK), _______, _______, _______, _______
     ),
 
     [_FUN] = LAYOUT_corne_hlc(
@@ -252,10 +253,6 @@ void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
         .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}),               \
     }
 
-tap_dance_action_t tap_dance_actions[] = {
-    [MS_ENC_CLK] = ACTION_TAP_DANCE_TAP_HOLD(MS_BTN1, MS_BTN2),
-};
-
 /* Return an integer that corresponds to what kind of tap dance should be executed.
  *
  * How to figure out tap dance state: interrupted and pressed.
@@ -296,6 +293,7 @@ void x_finished(tap_dance_state_t *state, void *user_data) {
         case TD_TRIPLE_TAP: register_code(KC_MPRV); break;
         default: break;
     }
+            reset_tap_dance(state);
 }
 
 void x_reset(tap_dance_state_t *state, void *user_data) {
@@ -313,5 +311,7 @@ void x_reset(tap_dance_state_t *state, void *user_data) {
 tap_dance_action_t tap_dance_actions[] = {
     [TO_BASE] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _BASE),
     [TO_GAME] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _GAME),
-    [CT_MED] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset)
+    [CT_MED] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
+    [MS_ENC_CLK] = ACTION_TAP_DANCE_TAP_HOLD(MS_BTN1, MS_BTN2),
 };
+
