@@ -1,3 +1,4 @@
+#include <cstdint>
 #include QMK_KEYBOARD_H
 
 enum layers {
@@ -31,12 +32,19 @@ enum custom_keycodes {
     KC_CWRD = SAFE_RANGE,
     MS_ENC_CW,
     MS_ENC_CCW,
+    MS_ENC_CLK,
 };
 
 typedef struct {
     bool       is_press_action;
     td_state_t state;
 } td_tap_t;
+
+typedef struct {
+    uint16_t tap;
+    uint16_t hold;
+    uint16_t held;
+} tap_dance_tap_hold_t;
 
 td_state_t cur_dance(tap_dance_state_t *state);
 void       x_finished(tap_dance_state_t *state, void *user_data);
@@ -51,23 +59,34 @@ combo_t key_combos[] = {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-   uint8_t mods = get_mods();
+    uint8_t mods = get_mods();
     switch (keycode) {
         case KC_CWRD:
             if (record->event.pressed) {
                 caps_word_on();
             }
             break;
+        case TD(MS_ENC_CLK):
+            action = tap_dance_get(QK_TAP_DANCE_GET_INDEX(keycode));
+            state = tap_dance_get_state(QK_TAP_DANCE_GET_INDEX(keycode));
+            if (!record->event.pressed && state != NULL && state->count && !state->finished) {
+                tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
+                tap_code16(tap_hold->tap);
+            }
+            break;
         case MS_ENC_CW:
             if (!record->event.pressed) {
                 break;
             }
-            if (mods & MOD_MASK_SHIFT) {
-                tap_code(MS_DOWN); // Move down
-            } else if (mods & MOD_MASK_CTRL) {
-                tap_code(MS_RGHT); // Move right
+            if (mods) {
+                if (MOD_MASK_SHIFT) {
+                    tap_code(MS_DOWN);
+                }
+                if (MOD_MASK_CTRL) {
+                    tap_code(MS_RGHT);
+                }
             } else {
-                tap_code(MS_WHLD); // Scroll down
+                tap_code(MS_WHLD);
             }
             return false;
         case MS_ENC_CCW:
@@ -75,11 +94,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 break;
             }
             if (mods & MOD_MASK_SHIFT) {
-                tap_code(MS_UP); // Move up
+                tap_code(MS_UP);
             } else if (mods & MOD_MASK_CTRL) {
-                tap_code(MS_LEFT); // Move left
+                tap_code(MS_LEFT);
             } else {
-                tap_code(MS_WHLU); // Scroll up
+                tap_code(MS_WHLU);
             }
             return false;
     }
@@ -155,7 +174,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
-            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+                   _______, _______, _______, _______, _______,          MS_BTN1, _______, _______, _______, _______
     ),
 
     [_FUN] = LAYOUT_corne_hlc(
@@ -193,6 +212,41 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [_MISC] = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
 };
 #endif
+
+void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+
+    if (state->pressed) {
+        if (state->count == 1
+            && !state->interrupted
+        ) {
+            register_code16(tap_hold->hold);
+            tap_hold->held = tap_hold->hold;
+        } else {
+            register_code16(tap_hold->tap);
+            tap_hold->held = tap_hold->tap;
+        }
+    }
+}
+
+void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+
+    if (tap_hold->held) {
+        unregister_code16(tap_hold->held);
+        tap_hold->held = 0;
+    }
+}
+
+#define ACTION_TAP_DANCE_TAP_HOLD(tap, hold)                                        \
+    {                                                                               \
+        .fn        = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, \
+        .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}),               \
+    }
+
+tap_dance_action_t tap_dance_actions[] = {
+    [MS_ENC_CLK] = ACTION_TAP_DANCE_TAP_HOLD(MS_BTN1, MS_BTN2),
+};
 
 /* Return an integer that corresponds to what kind of tap dance should be executed.
  *
