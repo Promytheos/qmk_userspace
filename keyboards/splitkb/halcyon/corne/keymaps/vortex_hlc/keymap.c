@@ -68,7 +68,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
         case TD(MS_ENC_CLK):
             action = tap_dance_get(QK_TAP_DANCE_GET_INDEX(keycode));
-            state = tap_dance_get_state(QK_TAP_DANCE_GET_INDEX(keycode));
+            state  = tap_dance_get_state(QK_TAP_DANCE_GET_INDEX(keycode));
             if (!record->event.pressed && state != NULL && state->count && !state->finished) {
                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
                 tap_code16(tap_hold->tap);
@@ -78,15 +78,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (!record->event.pressed) {
                 break;
             }
-            if (mods) {
-                if (MOD_MASK_SHIFT) {
-                    tap_code(MS_DOWN);
+            if (mods & MOD_MASK_SHIFT) {
+                tap_code(MS_DOWN);
+            }
+            if (mods & MOD_MASK_CTRL) {
+                tap_code(MS_RGHT);
+            }
+            if (!(mods & (MOD_MASK_SHIFT | MOD_MASK_CTRL))) {
+                if (mods & MOD_MASK_ALT) {
+                    tap_code(MS_WHLR);
+                } else {
+                    tap_code(MS_WHLD);
                 }
-                if (MOD_MASK_CTRL) {
-                    tap_code(MS_RGHT);
-                }
-            } else {
-                tap_code(MS_WHLD);
             }
             return false;
         case MS_ENC_CCW:
@@ -95,10 +98,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             if (mods & MOD_MASK_SHIFT) {
                 tap_code(MS_UP);
-            } else if (mods & MOD_MASK_CTRL) {
+            }
+            if (mods & MOD_MASK_CTRL) {
                 tap_code(MS_LEFT);
-            } else {
-                tap_code(MS_WHLU);
+            }
+            if (!(mods & (MOD_MASK_SHIFT | MOD_MASK_CTRL))) {
+                if (mods & MOD_MASK_ALT) {
+                    tap_code(MS_WHLL);
+                } else {
+                    tap_code(MS_WHLU);
+                }
             }
             return false;
     }
