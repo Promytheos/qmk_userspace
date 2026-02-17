@@ -23,11 +23,14 @@ typedef enum {
 
 enum {
     TO_BASE,
+    TO_GAME,
     CT_MED,
 };
 
 enum custom_keycodes {
     KC_CWRD = SAFE_RANGE,
+    MS_ENC_CW,
+    MS_ENC_CCW,
 };
 
 typedef struct {
@@ -36,18 +39,11 @@ typedef struct {
 } td_tap_t;
 
 td_state_t cur_dance(tap_dance_state_t *state);
-void x_finished(tap_dance_state_t *state, void *user_data);
-void x_reset(tap_dance_state_t *state, void *user_data);
-void caps_word_set_user(bool active) {
-    if (active) {
-        // Do something when Caps Word activates.
-    } else {
-        // Do something when Caps Word deactivates.
-    }
-}
+void       x_finished(tap_dance_state_t *state, void *user_data);
+void       x_reset(tap_dance_state_t *state, void *user_data);
 
-const uint16_t PROGMEM caps_word1[]  = {KC_F, KC_J, COMBO_END};
-const uint16_t PROGMEM caps_word2[]  = {LCTL_T(KC_F), RCTL_T(KC_J), COMBO_END};
+const uint16_t PROGMEM caps_word1[] = {KC_F, KC_J, COMBO_END};
+const uint16_t PROGMEM caps_word2[] = {LCTL_T(KC_F), RCTL_T(KC_J), COMBO_END};
 
 combo_t key_combos[] = {
     COMBO(caps_word1, KC_CWRD),
@@ -55,12 +51,37 @@ combo_t key_combos[] = {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+   uint8_t mods = get_mods();
     switch (keycode) {
         case KC_CWRD:
             if (record->event.pressed) {
                 caps_word_on();
             }
             break;
+        case MS_ENC_CW:
+            if (!record->event.pressed) {
+                break;
+            }
+            if (mods & MOD_MASK_SHIFT) {
+                tap_code(MS_DOWN); // Move down
+            } else if (mods & MOD_MASK_CTRL) {
+                tap_code(MS_RGHT); // Move right
+            } else {
+                tap_code(MS_WHLD); // Scroll down
+            }
+            return false;
+        case MS_ENC_CCW:
+            if (!record->event.pressed) {
+                break;
+            }
+            if (mods & MOD_MASK_SHIFT) {
+                tap_code(MS_UP); // Move up
+            } else if (mods & MOD_MASK_CTRL) {
+                tap_code(MS_LEFT); // Move left
+            } else {
+                tap_code(MS_WHLU); // Scroll up
+            }
+            return false;
     }
     return true;
 }
@@ -70,7 +91,7 @@ bool caps_word_press_user(uint16_t keycode) {
         // Keycodes that continue Caps Word, with shift applied.
         case KC_A ... KC_Z:
         case KC_MINS:
-            add_weak_mods(MOD_BIT(KC_LSFT));  // Apply shift to next key.
+            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
             return true;
 
         // Keycodes that continue Caps Word, without shifting.
@@ -82,7 +103,16 @@ bool caps_word_press_user(uint16_t keycode) {
             return true;
 
         default:
-            return false;  // Deactivate Caps Word.
+            return false; // Deactivate Caps Word.
+    }
+}
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case CT_MED:
+            return TAPPING_TERM + 100;
+        default:
+            return TAPPING_TERM;
     }
 }
 
@@ -105,7 +135,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_NUM] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TO(_GAME), KC_NO,   KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   TO_GAME, KC_NO,   KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          KC_EQL,   KC_4, KC_5, KC_6, KC_SCLN, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          KC_BSLS,  KC_1, KC_2, KC_3, KC_GRV,  KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          KC_MINUS, KC_0, KC_DOT,
@@ -113,7 +143,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_NAV] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TO(_GAME), KC_NO,   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
+            KC_NO, KC_NO,   KC_NO,   TO_GAME, KC_NO,   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_CAPS, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  KC_NO,   KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          KC_NO,   KC_NO,   KC_NO ,
@@ -121,7 +151,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_MOUSE] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TO(_GAME), KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
+            KC_NO, KC_NO,   KC_NO,   TO_GAME, KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
@@ -190,7 +220,6 @@ td_state_t cur_dance(tap_dance_state_t *state) {
 
 // Leave TD_DOUBLE_HOLD and TD_TRIPLE_HOLD undefined until I decide to use them
 
-// Create an instance of 'td_tap_t' for the 'x' tap dance.
 static td_tap_t xtap_state = {
     .is_press_action = true,
     .state = TD_NONE
@@ -221,5 +250,6 @@ void x_reset(tap_dance_state_t *state, void *user_data) {
 // Tap Dance definitions
 tap_dance_action_t tap_dance_actions[] = {
     [TO_BASE] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _BASE),
+    [TO_GAME] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _GAME),
     [CT_MED] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset)
 };
