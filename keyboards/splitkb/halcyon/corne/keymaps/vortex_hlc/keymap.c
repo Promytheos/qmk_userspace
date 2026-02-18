@@ -82,7 +82,7 @@ bool caps_word_press_user(uint16_t keycode) {
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case CT_MED:
-            return 500;
+            return 300;
         default:
             return TAPPING_TERM;
     }
@@ -294,7 +294,7 @@ void x_finished(tap_dance_state_t *state, void *user_data) {
         case TD_TRIPLE_TAP: register_code(KC_MPRV); break;
         default: break;
     }
-            reset_tap_dance(state);
+    reset_tap_dance(state);
 }
 
 void x_reset(tap_dance_state_t *state, void *user_data) {
