@@ -50,12 +50,10 @@ td_state_t cur_dance(tap_dance_state_t *state);
 void       x_finished(tap_dance_state_t *state, void *user_data);
 void       x_reset(tap_dance_state_t *state, void *user_data);
 
-const uint16_t PROGMEM caps_word1[] = {KC_F, KC_J, COMBO_END};
-const uint16_t PROGMEM caps_word2[] = {LCTL_T(KC_F), RCTL_T(KC_J), COMBO_END};
+const uint16_t PROGMEM caps_word[] = {LCTL_T(KC_F), RCTL_T(KC_J), COMBO_END};
 
 combo_t key_combos[] = {
-    COMBO(caps_word1, KC_CWRD),
-    COMBO(caps_word2, KC_CWRD),
+    COMBO(caps_word, KC_CWRD),
 };
 
 bool caps_word_press_user(uint16_t keycode) {
@@ -110,14 +108,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (!record->event.pressed) {
                 break;
             }
-            if (mods & MOD_MASK_SHIFT) {
+            if (mods & MOD_MASK_GUI) {
                 tap_code(MS_DOWN);
             }
-            if (mods & MOD_MASK_CTRL) {
+            if (mods & MOD_MASK_ALT) {
                 tap_code(MS_RGHT);
             }
-            if (!(mods & (MOD_MASK_SHIFT | MOD_MASK_CTRL))) {
-                if (mods & MOD_MASK_ALT) {
+            if (!(mods & (MOD_MASK_ALT | MOD_MASK_GUI))) {
+                if (mods & MOD_MASK_SHIFT) {
                     tap_code(MS_WHLR);
                 } else {
                     tap_code(MS_WHLD);
@@ -128,14 +126,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (!record->event.pressed) {
                 break;
             }
-            if (mods & MOD_MASK_SHIFT) {
+            if (mods & MOD_MASK_GUI) {
                 tap_code(MS_UP);
             }
-            if (mods & MOD_MASK_CTRL) {
+            if (mods & MOD_MASK_ALT) {
                 tap_code(MS_LEFT);
             }
-            if (!(mods & (MOD_MASK_SHIFT | MOD_MASK_CTRL))) {
-                if (mods & MOD_MASK_ALT) {
+            if (!(mods & (MOD_MASK_ALT | MOD_MASK_GUI))) {
+                if (mods & MOD_MASK_SHIFT) {
                     tap_code(MS_WHLL);
                 } else {
                     tap_code(MS_WHLU);
