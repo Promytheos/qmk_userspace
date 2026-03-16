@@ -80,6 +80,9 @@ bool caps_word_press_user(uint16_t keycode) {
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case TD(CT_MED):
+        case TD(TO_BASE):
+        case TD(TO_GAME):
+        case TD(MS_ENC_CLK):
             return 300;
         default:
             return TAPPING_TERM;
