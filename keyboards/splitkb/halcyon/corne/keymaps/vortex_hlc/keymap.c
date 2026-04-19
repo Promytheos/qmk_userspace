@@ -116,15 +116,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (!record->event.pressed) {
                 break;
             }
-            if (mods & MOD_MASK_SHIFT) {
+            if (mods & MOD_MASK_GUI) {
                 tap_code(MS_DOWN);
             }
             if (mods & MOD_MASK_ALT) {
                 tap_code(MS_RGHT);
             }
-            if (!(mods & (MOD_MASK_ALT | MOD_MASK_SHIFT))) {
-                if (mods & MOD_MASK_GUI) {
+            if (!(mods & (MOD_MASK_AG))) {
+                if (mods & MOD_MASK_SHIFT) {
+                    unregister_mods(MOD_MASK_SHIFT);
                     tap_code(MS_WHLR);
+                    register_mods(MOD_BIT(KC_LSFT));
                 } else {
                     tap_code(MS_WHLD);
                 }
@@ -134,15 +136,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (!record->event.pressed) {
                 break;
             }
-            if (mods & MOD_MASK_SHIFT) {
+            if (mods & MOD_MASK_GUI) {
                 tap_code(MS_UP);
             }
             if (mods & MOD_MASK_ALT) {
                 tap_code(MS_LEFT);
             }
-            if (!(mods & (MOD_MASK_ALT | MOD_MASK_SHIFT))) {
-                if (mods & MOD_MASK_GUI) {
+            if (!(mods & MOD_MASK_AG)) {
+                if (mods & MOD_MASK_SHIFT) {
+                    unregister_mods(MOD_MASK_SHIFT);
                     tap_code(MS_WHLL);
+                    register_mods(MOD_BIT(KC_LSFT));
                 } else {
                     tap_code(MS_WHLU);
                 }
