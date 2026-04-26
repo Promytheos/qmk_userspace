@@ -4,7 +4,8 @@
 #include QMK_KEYBOARD_H
 
 enum layers {
-    _BASE = 0,
+    _CMAK = 0,
+    _QWRT,
     _GAME,
     _NUM,
     _NAV,
@@ -25,7 +26,8 @@ typedef enum {
 } td_state_t;
 
 enum {
-    TO_BASE,
+    TO_QWRT,
+    TO_CMAK,
     TO_GAME,
     CT_MED,
     MS_ENC_CLK,
@@ -55,7 +57,7 @@ td_state_t cur_dance(tap_dance_state_t *state);
 void       x_finished(tap_dance_state_t *state, void *user_data);
 void       x_reset(tap_dance_state_t *state, void *user_data);
 
-const uint16_t PROGMEM caps_word[] = {LCTL_T(KC_F), RCTL_T(KC_J), COMBO_END};
+const uint16_t PROGMEM caps_word[] = {LCTL_T(KC_T), RCTL_T(KC_N), COMBO_END};
 
 combo_t key_combos[] = {
     COMBO(caps_word, KC_CWRD),
@@ -85,7 +87,8 @@ bool caps_word_press_user(uint16_t keycode) {
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case TD(CT_MED):
-        case TD(TO_BASE):
+        case TD(TO_QWRT):
+        case TD(TO_CMAK):
         case TD(TO_GAME):
         case TD(MS_ENC_CLK):
             return 300;
@@ -177,10 +180,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [_BASE] = LAYOUT_corne_hlc(
+    [_CMAK] = LAYOUT_corne_hlc(
+            KC_NO, KC_Q,         KC_W,         KC_F,          KC_P,            KC_B,                KC_K,   KC_L,          KC_U,         KC_Y,         KC_QUOT,            KC_NO ,
+            KC_NO, LGUI_T(KC_A), LALT_T(KC_R), LSFT_T(KC_S),  LCTL_T(KC_T),    KC_G,                KC_M,   RCTL_T(KC_N),  RSFT_T(KC_E), RALT_T(KC_I), RGUI_T(KC_O), KC_NO ,
+            KC_NO, KC_Z,         KC_X,         KC_C,          KC_D,            KC_V,                KC_J,   KC_H,          KC_COMM,      KC_DOT,       KC_SLSH,         KC_NO,
+                                                     LT(_NAV, KC_DEL), LT(_NUM, KC_BSPC),  LT(_MOUSE, KC_ENT),       KC_TAB, LT(_FUN, KC_SPC), LT(_MISC, KC_ESC) ,
+                                                     TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO,             TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO
+    ),
+
+    [_QWRT] = LAYOUT_corne_hlc(
             KC_NO, KC_Q,         KC_W,         KC_E,          KC_R,            KC_T,                KC_Y,   KC_U,          KC_I,         KC_O,         KC_P,            KC_NO ,
             KC_NO, LGUI_T(KC_A), LALT_T(KC_S), LSFT_T(KC_D),  LCTL_T(KC_F),    KC_G,                KC_H,   RCTL_T(KC_J),  RSFT_T(KC_K), RALT_T(KC_L), RGUI_T(KC_QUOT), KC_NO ,
-            KC_NO, KC_Z,         KC_X,         KC_C,          KC_V,            KC_B,                KC_N,   KC_M,          KC_COMM,      KC_DOT,       KC_SLSH,         KC_NO,
+            KC_NO, KC_Z,         KC_X,         KC_C,          KC_V,            KC_B,                KC_N,   KC_M,          KC_COMM,      KC_DOT,       KC_SLSH,         TD(TO_CMAK),
                                                      LT(_NAV, KC_DEL), LT(_NUM, KC_BSPC),  LT(_MOUSE, KC_ENT),       KC_TAB, LT(_FUN, KC_SPC), LT(_MISC, KC_ESC) ,
                                                      TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO,             TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO
     ),
@@ -188,13 +199,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_GAME] = LAYOUT_corne_hlc(
             KC_ESC,  KC_Q, KC_W, KC_E,    KC_R,   KC_T,          KC_Y,    KC_U,   KC_I,    KC_O,   KC_P,    KC_MINUS ,
             KC_TAB,  KC_A, KC_S, KC_D,    KC_F,   KC_G,          KC_H,    KC_J,   KC_K,    KC_L,   KC_QUOT, MO(_NUM),
-            KC_LSFT, KC_Z, KC_X, KC_C,    KC_V,   KC_B,          KC_N,    KC_M,   KC_COMM, KC_DOT, KC_SLSH, TD(TO_BASE),
+            KC_LSFT, KC_Z, KC_X, KC_C,    KC_V,   KC_B,          KC_N,    KC_M,   KC_COMM, KC_DOT, KC_SLSH, TD(TO_CMAK),
                                  KC_LCTL, KC_SPC, KC_LALT,       MO(_FUN),  KC_ENT, MO(_NAV) ,
                  TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO,             TD(CT_MED), KC_NO, KC_NO, KC_NO, KC_NO
     ),
 
     [_NUM] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TD(TO_GAME), KC_NO,   KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
+            KC_NO, KC_NO,   TD(TO_QWRT),   TD(TO_GAME), KC_NO,   KC_NO,          KC_LBRC,  KC_7, KC_8, KC_9, KC_RBRC, KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          KC_EQL,   KC_4, KC_5, KC_6, KC_SCLN, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          KC_BSLS,  KC_1, KC_2, KC_3, KC_GRV,  KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          KC_MINUS, KC_0, KC_DOT,
@@ -202,7 +213,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_NAV] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TD(TO_GAME), KC_NO,   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
+            KC_NO, KC_NO,   TD(TO_QWRT),   TD(TO_GAME), KC_NO,   KC_NO,          KC_PSTE,   KC_COPY,   KC_CUT,   KC_UNDO,   KC_AGIN,   KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_CAPS, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  KC_NO,   KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          KC_NO,   KC_NO,   KC_NO ,
@@ -210,7 +221,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_MOUSE] = LAYOUT_corne_hlc(
-            KC_NO, KC_NO,   KC_NO,   TD(TO_GAME),   KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
+            KC_NO, KC_NO,   TD(TO_QWRT),   TD(TO_GAME),   KC_NO,   KC_NO,          KC_NO,   MS_ACL0, MS_ACL1, MS_ACL2,  KC_NO, KC_NO,
             KC_NO, KC_LGUI, KC_LALT, KC_LSFT,   KC_LCTL, KC_NO,          MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, KC_NO, KC_NO,
             KC_NO, KC_NO,   KC_NO,   KC_NO,     KC_NO,   KC_NO,          MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR,  KC_NO, KC_NO,
                                      KC_NO,     KC_NO,   KC_NO,          MS_BTN2, MS_BTN1, MS_BTN3,
@@ -243,7 +254,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [_BASE]  = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)       },
+    [_CMAK]  = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)       },
+    [_QWRT]  = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)       },
     [_GAME]  = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)       },
     [_NUM]   = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU)       },
     [_NAV]   = { ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(KC_NO, KC_NO),  ENCODER_CCW_CW(NV_ENC_CCW, NV_ENC_CW)      },
@@ -340,7 +352,8 @@ void x_reset(tap_dance_state_t *state, void *user_data) {
 
 // Tap Dance definitions
 tap_dance_action_t tap_dance_actions[] = {
-    [TO_BASE] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _BASE),
+    [TO_QWRT] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _QWRT),
+    [TO_CMAK] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _CMAK),
     [TO_GAME] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _GAME),
     [CT_MED] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
     [MS_ENC_CLK] = ACTION_TAP_DANCE_TAP_HOLD(MS_BTN1, MS_BTN2),
